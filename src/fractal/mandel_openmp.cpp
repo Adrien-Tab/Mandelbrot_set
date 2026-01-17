@@ -10,7 +10,7 @@ concept FractalFunction = std::invocable<F, T, T> && requires(F f, T a, T b) {
 };
 
 // Convert a pixel coordinate to the complex domain
-Complex scale(const WindowDim<uint32_t> &screen, const WindowDim<double> &fr,
+Complex scale(const WindowDim<uint32_t>& screen, const WindowDim<double>& fr,
               Complex c) noexcept {
   // Avoid repeated calculations by storing width and height ratios
   const double x_ratio = fr.width() / static_cast<double>(screen.width());
@@ -36,9 +36,9 @@ uint32_t escape(Complex c, uint32_t iter_max, Fractal_t func) {
 // Loop over each pixel from our image and check if the points associated with this pixel
 // escape to infinity
 template <FractalFunction Fractal_t>
-void get_number_iterations(const WindowDim<uint32_t> &screen,
-                           const WindowDim<double> &fract, uint32_t iter_max,
-                           uint32_t *escape_step, Fractal_t func) {
+void get_number_iterations(const WindowDim<uint32_t>& screen,
+                           const WindowDim<double>& fract, uint32_t iter_max,
+                           uint32_t* escape_step, Fractal_t func) {
   const uint32_t width    = screen.width();
   const uint32_t height   = screen.height();
   const uint32_t total_px = width * height;
@@ -55,7 +55,7 @@ void get_number_iterations(const WindowDim<uint32_t> &screen,
 }
 
 void mandelbrot(const WindowDim<uint32_t> screen, const WindowDim<double> fract,
-                uint32_t *escape_step, uint32_t iter_max) {
+                uint32_t* escape_step, uint32_t iter_max) {
   // The function used to calculate the fractal
   constexpr auto func = [](const Complex z, const Complex c) noexcept -> Complex {
     return z * z + c;

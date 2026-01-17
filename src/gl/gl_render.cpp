@@ -9,37 +9,29 @@
 #include "fractal/mandelbrot.hpp"
 #include "render/color_scheme.hpp"
 
-void handle_render(GLFWwindow* const window, WindowDim<double> *fract) {
-  glDisable(GL_LIGHTING);
-  glDisable(GL_DEPTH_TEST);
+void handle_render(GLFWwindow* const window, WindowDim<double>* fract) {
   glEnable(GL_TEXTURE_2D);
   glClearColor(0.f, 0.f, 0.f, 1.f);
   glClearDepth(1.f);
   GL_CHECK();
 
-  constexpr float vertices[] = {
-     1.0f,  1.0f, 0.0f,   1.0f, 1.0f,
-     1.0f, -1.0f, 0.0f,   1.0f, 0.0f,
-    -1.0f, -1.0f, 0.0f,   0.0f, 0.0f,
-    -1.0f,  1.0f, 0.0f,   0.0f, 1.0f
-  };
+  constexpr float vertices[] = {1.0f, 1.0f,  0.0f, 1.0f,  1.0f,  1.0f, -1.0f,
+                                0.0f, 1.0f,  0.0f, -1.0f, -1.0f, 0.0f, 0.0f,
+                                0.0f, -1.0f, 1.0f, 0.0f,  0.0f,  1.0f};
 
-  constexpr unsigned int indices[] = {
-    0, 1, 3,
-    1, 2, 3
-  };
+  constexpr unsigned int indices[] = {0, 1, 3, 1, 2, 3};
 
   // Vertex
   GLuint VAO, VBO, EBO;
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
   glGenBuffers(1, &EBO);
-  
+
   glBindVertexArray(VAO);
-  
+
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-  
+
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
@@ -48,7 +40,8 @@ void handle_render(GLFWwindow* const window, WindowDim<double> *fract) {
   glEnableVertexAttribArray(0);
 
   // Texture attribute
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                        (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
   GL_CHECK();
@@ -65,17 +58,17 @@ void handle_render(GLFWwindow* const window, WindowDim<double> *fract) {
 
   // Texture 2D
   GLuint texture_image = 0;
-  int width = 0;
-  int height = 0;
+  int width            = 0;
+  int height           = 0;
 
   glGenTextures(1, &texture_image);
   glBindTexture(GL_TEXTURE_2D, texture_image);
 
-  // Texture parameters 
+  // Texture parameters
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  float border_color[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-  glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border_color);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
   glfwGetWindowSize(window, &width, &height);
   WindowDim<uint32_t> screen(width, height);
@@ -83,7 +76,7 @@ void handle_render(GLFWwindow* const window, WindowDim<double> *fract) {
   GLubyte* texture_data = new GLubyte[screen.size() * 3];
   WindowUtils::adjust_ratio(screen, fract);
   GlobalConfig::set_fractal_dim(fract->width(), fract->height());
-  uint32_t *escape_step = new uint32_t[screen.size()];
+  uint32_t* escape_step = new uint32_t[screen.size()];
 
   int iter_max = GlobalConfig::get_iter_max();
   mandelbrot(screen, *fract, escape_step, iter_max);
@@ -91,21 +84,22 @@ void handle_render(GLFWwindow* const window, WindowDim<double> *fract) {
   size_t k = 0;
   // Iterate each pixel
   for (const auto& _ : screen) {
-    uint32_t n      = escape_step[k];
-    auto [r, g, b]  = ColorSchemes::get_color(n, iter_max);
+    uint32_t n              = escape_step[k];
+    auto [r, g, b]          = ColorSchemes::get_color(n, iter_max);
     texture_data[3 * k + 0] = r;
     texture_data[3 * k + 1] = g;
     texture_data[3 * k + 2] = b;
     k++;
   }
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height,
-               0, GL_RGB, GL_UNSIGNED_BYTE, texture_data);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+               texture_data);
   GL_CHECK();
 
+  unsigned int frame_counter = 0;
   while (!glfwWindowShouldClose(window)) {
     auto [center_x, center_y] = GlobalConfig::get_center();
-    iter_max = GlobalConfig::get_iter_max();
+    iter_max                  = GlobalConfig::get_iter_max();
     if (GlobalConfig::is_window_resized()) {
       glfwGetWindowSize(window, &width, &height);
       screen.reset(0, width, 0, height);
@@ -114,7 +108,7 @@ void handle_render(GLFWwindow* const window, WindowDim<double> *fract) {
       delete[] texture_data;
       escape_step  = new uint32_t[screen.size()];
       texture_data = new GLubyte[screen.size() * 3];
-
+      std::cout << "Screen size : " << screen.size() << std::endl;
       WindowUtils::adjust_ratio(screen, fract);
       GlobalConfig::set_fractal_dim(fract->width(), fract->height());
 
@@ -126,25 +120,28 @@ void handle_render(GLFWwindow* const window, WindowDim<double> *fract) {
     GlobalConfig::set_fractal_dim(fract->width(), fract->height());
     WindowUtils::zoom(center_x, center_y, zoom, fract);
 
+    auto fractal_start = std::chrono::steady_clock::now();
     mandelbrot(screen, *fract, escape_step, iter_max);
+    LogInfo::set_fractal_time(std::chrono::duration<float, std::milli>(
+                                  std::chrono::steady_clock::now() - fractal_start)
+                                  .count());
 
     auto display_start = std::chrono::steady_clock::now();
-    glClear(GL_COLOR_BUFFER_BIT);
 
     k = 0;
     // Iterate each pixel
     for (const auto& _ : screen) {
-      uint32_t n      = escape_step[k];
-      auto [r, g, b]  = ColorSchemes::get_color(n, iter_max);
-      texture_data[3 * k + 0] = r;
+      uint32_t n              = escape_step[k];
+      auto [r, g, b]          = ColorSchemes::get_color(n, iter_max);
+      texture_data[3 * k + 0] = b;
       texture_data[3 * k + 1] = g;
-      texture_data[3 * k + 2] = b;
+      texture_data[3 * k + 2] = r;
       k++;
     }
 
     glBindTexture(GL_TEXTURE_2D, texture_image);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height,
-                    GL_RGB, GL_UNSIGNED_BYTE, texture_data);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE,
+                    texture_data);
 
     glUseProgram(shader_program);
     glBindVertexArray(VAO);
@@ -152,8 +149,14 @@ void handle_render(GLFWwindow* const window, WindowDim<double> *fract) {
 
     glfwSwapBuffers(window);
     LogInfo::set_display_time_ms(std::chrono::duration<float, std::milli>(
-                                 std::chrono::steady_clock::now() - display_start).count());
+                                     std::chrono::steady_clock::now() - display_start)
+                                     .count());
+    frame_counter++;
+    if (frame_counter % 30 == 0) {
+      LogInfo::print_log();
+    }
     glfwWaitEvents();
+    glClear(GL_COLOR_BUFFER_BIT);
     // std::cout << "New event !" << std::endl;
   }
 
@@ -165,7 +168,6 @@ void handle_render(GLFWwindow* const window, WindowDim<double> *fract) {
   delete[] texture_data;
   delete[] escape_step;
 }
-
 
 /*
 void updateTextureFromColorArray(sf::Texture &texture, const sf::Color *colorArray) {

@@ -19,7 +19,7 @@ import core.global_config;
 
 std::string now_to_string() {
   time_t t    = time(nullptr);
-  tm *tm_time = localtime(&t);
+  tm* tm_time = localtime(&t);
 
   if (tm_time == nullptr) {
     std::cerr << "Error: localtime() \n";
@@ -45,8 +45,8 @@ std::string pos_to_string(double x, double y, double zoom_level) {
   return result;
 }
 
-void save_image(WindowDim<uint32_t> &scr, uint32_t *escape_step, uint32_t iter_max,
-                const char *fname) {
+void save_image(WindowDim<uint32_t>& scr, uint32_t* escape_step, uint32_t iter_max,
+                const char* fname) {
 // active only for static linking
 #ifdef FREEIMAGE_LIB
   FreeImage_Initialise();
@@ -54,7 +54,7 @@ void save_image(WindowDim<uint32_t> &scr, uint32_t *escape_step, uint32_t iter_m
 
   uint32_t width   = scr.width();
   uint32_t height  = scr.height();
-  FIBITMAP *bitmap = FreeImage_Allocate(width, height, 32);  // RGBA
+  FIBITMAP* bitmap = FreeImage_Allocate(width, height, 32);  // RGBA
 
   int k = 0;
   ColorSchemes::RGB_t rgb;

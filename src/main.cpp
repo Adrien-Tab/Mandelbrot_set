@@ -18,10 +18,8 @@ import core.global_config;
 template <typename T>
   requires(std::is_floating_point_v<T>)
 void sfml_handle(WindowDim<T> fract) {
-
   GLFWUtils::initialize();
-  GLFWwindow* const window =
-      GLFWUtils::create_window(1200, 800);
+  GLFWwindow* const window = GLFWUtils::create_window(1200, 800);
   GLFWUtils::print_configuration();
 
   handle_event(window);

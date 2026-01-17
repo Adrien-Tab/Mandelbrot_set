@@ -64,11 +64,10 @@ struct WindowDim {
     T y_max;
 
    public:
-    Iterator(T _x, T _y, T _x_max, T _y_max) : x(_x), y(_y), x_max(_x_max), y_max(_y_max) {};
+    Iterator(T _x, T _y, T _x_max, T _y_max)
+        : x(_x), y(_y), x_max(_x_max), y_max(_y_max) {};
 
-    std::pair<T,T> operator*() const {
-      return std::pair<T,T>{x, y};
-    }
+    std::pair<T, T> operator*() const { return std::pair<T, T>{x, y}; }
 
     Iterator& operator++() {
       if (this->x < x_max - 1) {
@@ -83,11 +82,9 @@ struct WindowDim {
     bool operator==(const Iterator& other_it) const {
       return this->x == other_it.x && this->y == other_it.y;
     }
-
   };
 
   Iterator begin() { return Iterator(_x_min, _y_min, _x_max, _y_max); }
 
   Iterator end() { return Iterator(0, _y_max, _x_max, _y_max); }
-
 };

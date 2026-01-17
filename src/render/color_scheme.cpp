@@ -19,13 +19,20 @@ constexpr auto color_scheme_functions = std::make_tuple(
 RGB_t get_color(uint32_t n, uint32_t iter_max) {
   uint32_t idx = GlobalConfig::get_color_scheme();
   switch (idx % std::tuple_size_v<decltype(color_scheme_functions)>) {
-    case 0: return std::invoke(std::get<0>(color_scheme_functions), n, iter_max);
-    case 1: return std::invoke(std::get<1>(color_scheme_functions), n, iter_max);
-    case 2: return std::invoke(std::get<2>(color_scheme_functions), n, iter_max);
-    case 3: return std::invoke(std::get<3>(color_scheme_functions), n, iter_max);
-    case 4: return std::invoke(std::get<4>(color_scheme_functions), n, iter_max);
-    case 5: return std::invoke(std::get<5>(color_scheme_functions), n, iter_max);
-    default: return std::invoke(std::get<1>(color_scheme_functions), n, iter_max);
+    case 0:
+      return std::invoke(std::get<0>(color_scheme_functions), n, iter_max);
+    case 1:
+      return std::invoke(std::get<1>(color_scheme_functions), n, iter_max);
+    case 2:
+      return std::invoke(std::get<2>(color_scheme_functions), n, iter_max);
+    case 3:
+      return std::invoke(std::get<3>(color_scheme_functions), n, iter_max);
+    case 4:
+      return std::invoke(std::get<4>(color_scheme_functions), n, iter_max);
+    case 5:
+      return std::invoke(std::get<5>(color_scheme_functions), n, iter_max);
+    default:
+      return std::invoke(std::get<1>(color_scheme_functions), n, iter_max);
   }
 }
 

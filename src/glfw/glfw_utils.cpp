@@ -76,10 +76,14 @@ void print_configuration() {
 const char* get_glfw_platform_name() {
   int platform = glfwGetPlatform();
   switch (platform) {
-    case GLFW_PLATFORM_WIN32: return "Win32";
-    case GLFW_PLATFORM_X11: return "X11";
-    case GLFW_PLATFORM_WAYLAND: return "Wayland";
-    default: return "Unknown";
+    case GLFW_PLATFORM_WIN32:
+      return "Win32";
+    case GLFW_PLATFORM_X11:
+      return "X11";
+    case GLFW_PLATFORM_WAYLAND:
+      return "Wayland";
+    default:
+      return "Unknown";
   }
 }
 

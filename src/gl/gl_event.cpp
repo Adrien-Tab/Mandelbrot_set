@@ -13,7 +13,8 @@ import core.global_config;
 #include "core/global_config.hpp"
 #endif
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+static void key_callback(GLFWwindow* window, int key, int scancode, int action,
+                         int mods) {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
   }
@@ -61,24 +62,22 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
   }
 }
 
-static void scroll_callback(GLFWwindow* window, double , double yoffset) {
+static void scroll_callback(GLFWwindow* window, double, double yoffset) {
   double xpos = 0.0;
   double ypos = 0.0;
-  int width = 0;
-  int height = 0;
+  int width   = 0;
+  int height  = 0;
   glfwGetWindowSize(window, &width, &height);
   glfwGetCursorPos(window, &xpos, &ypos);
 
   auto [frac_width, frac_height] = GlobalConfig::get_fractal_dim();
-  double zoomFactor = yoffset > 0 ? 1.2 : 1 / 1.2;
+  double zoomFactor              = yoffset > 0 ? 1.2 : 1 / 1.2;
 
   double ratio_x = frac_width / static_cast<double>(width);
   double ratio_y = frac_height / static_cast<double>(height);
 
-  double delta_x =
-      0.5 * (xpos - static_cast<float>(width) * 0.5) * ratio_x;
-  double delta_y =
-      -0.5 * (ypos - static_cast<float>(height) * 0.5) * ratio_y;
+  double delta_x = 0.5 * (xpos - static_cast<float>(width) * 0.5) * ratio_x;
+  double delta_y = -0.5 * (ypos - static_cast<float>(height) * 0.5) * ratio_y;
 
   GlobalConfig::change_zoom(zoomFactor);
   GlobalConfig::move_center(delta_x, delta_y);

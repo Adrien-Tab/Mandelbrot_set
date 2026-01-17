@@ -49,7 +49,8 @@ bool loadShader(GLuint& shader, GLenum shader_type, const GLchar* shader_code) {
   return true;
 }
 
-bool linkProgram(GLuint* shader_program, const GLuint& vertex_shader, const GLuint& fragment_shader) {
+bool linkProgram(GLuint* shader_program, const GLuint& vertex_shader,
+                 const GLuint& fragment_shader) {
   glAttachShader(*shader_program, vertex_shader);
   glAttachShader(*shader_program, fragment_shader);
   glLinkProgram(*shader_program);
@@ -69,5 +70,4 @@ bool linkProgram(GLuint* shader_program, const GLuint& vertex_shader, const GLui
   return true;
 }
 
-
-} // namespace GLUtils
+}  // namespace GLUtils
