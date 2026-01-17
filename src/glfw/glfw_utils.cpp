@@ -61,16 +61,6 @@ void print_configuration() {
             << "  GLFW Version    :   " << glfwGetVersionString() << "\n"
             << "  GLFW Platform   :   " << get_glfw_platform_name() << "\n";
   std::cout << std::endl;
-
-  int device_count = 0;
-  HIP_CHECK(hipGetDeviceCount(&device_count));
-
-  if (device_count == 0) {
-    std::cerr << "No HIP devices found" << std::endl;
-  } else {
-    std::cout << "Number of HIP devices: " << device_count << std::endl;
-  }
-  print_device_prop(0);
 }
 
 const char* get_glfw_platform_name() {
@@ -88,60 +78,3 @@ const char* get_glfw_platform_name() {
 }
 
 }  // namespace GLFWUtils
-
-void print_device_prop(int deviceIndex) {
-  hipDeviceProp_t device_prop;
-  HIP_CHECK(hipGetDeviceProperties(&device_prop, deviceIndex));
-
-  std::cout.width(26);
-  std::cout << std::left << "Device name: " << device_prop.name << std::endl;
-  std::cout.width(26);
-  std::cout << std::left << "GCN arch name: " << device_prop.gcnArchName << std::endl;
-
-  int runtime_version = 0;
-  HIP_CHECK(hipRuntimeGetVersion(&runtime_version));
-  int version_major = runtime_version / 10000000;
-  int version_minor = (runtime_version - version_major * 10000000) / 100000;
-  int version_patch = runtime_version - version_major * 10000000 - version_minor * 100000;
-  std::cout.width(26);
-  std::cout << std::left << "HIP runtime version: " << version_major << "."
-            << version_minor << "." << version_patch << std::endl;
-
-  HIP_CHECK(hipDriverGetVersion(&runtime_version));
-  version_major = runtime_version / 10000000;
-  version_minor = (runtime_version - version_major * 10000000) / 100000;
-  version_patch = runtime_version - version_major * 10000000 - version_minor * 100000;
-  std::cout.width(26);
-  std::cout << std::left << "HIP driver version: " << version_major << "."
-            << version_minor << "." << version_patch << std::endl;
-
-  std::cout << std::endl;
-  std::cout.width(32);
-  std::cout << std::left
-            << "Total global memory: " << device_prop.totalGlobalMem / (1024 * 1024)
-            << " MB" << std::endl;
-  std::cout.width(32);
-  std::cout << std::left
-            << "Has warp vote: " << (device_prop.arch.hasWarpVote ? "Yes" : "No")
-            << std::endl;
-  std::cout.width(32);
-  std::cout << std::left << "Warp size: " << device_prop.warpSize << std::endl;
-  std::cout.width(32);
-  std::cout << std::left << "Multiprocessor count: " << device_prop.multiProcessorCount
-            << std::endl;
-  std::cout.width(32);
-  std::cout << std::left << "Max threads per block: " << device_prop.maxThreadsPerBlock
-            << std::endl;
-  std::cout.width(32);
-  std::cout << std::left << "Max threads per multiprocessor: "
-            << device_prop.maxThreadsPerMultiProcessor << std::endl;
-
-  std::cout << std::endl;
-  std::cout.width(30);
-  std::cout << std::left
-            << "Registers per multiprocessor: " << device_prop.regsPerMultiprocessor
-            << std::endl;
-  std::cout.width(30);
-  std::cout << std::left << "Registers per block: " << device_prop.regsPerBlock
-            << std::endl;
-}

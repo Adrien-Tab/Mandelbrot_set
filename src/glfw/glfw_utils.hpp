@@ -4,10 +4,6 @@
 
 #include <GLFW/glfw3.h>
 
-#include <hip/hip_runtime.h>
-
-void print_device_prop(int deviceIndex);
-
 namespace GLFWUtils {
 
 GLFWwindow* create_window(const int initial_width, const int initial_height);

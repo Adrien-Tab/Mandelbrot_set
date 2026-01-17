@@ -2,6 +2,8 @@
 
 #include "utils.hpp"
 
+#include <utility>
+
 template <typename T>
 struct WindowDim {
   T _x_min, _x_max, _y_min, _y_max;

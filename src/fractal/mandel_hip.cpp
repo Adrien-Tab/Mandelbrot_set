@@ -11,15 +11,6 @@ concept FractalFunction = requires(F f, T a, T b) {
   { f(a, b) } -> std::same_as<T>;
 };
 
-#define HIP_CHECK(condition)                                             \
-  {                                                                      \
-    hipError_t err = condition;                                          \
-    if (err != hipSuccess) {                                             \
-      std::cerr << __FILE__ << ":" << __LINE__ << "\t"                   \
-                << "HIP error: " << hipGetErrorString(err) << std::endl; \
-    }                                                                    \
-  }
-
 // From screen coordinate to fract complex coord
 DEVICE_INLINE_FUNCTION Complex scale(const WindowDim<uint32_t>& screen,
                                      const WindowDim<double>& fract, Complex c) {
@@ -83,11 +74,9 @@ void mandelbrot(const WindowDim<uint32_t> screen, const WindowDim<double> fract,
                      block_size, 0, hipStreamDefault, screen, fract, iter_max,
                      d_escape_step, func);
 
-  HIP_CHECK(hipDeviceSynchronize());
-  HIP_CHECK(hipGetLastError());
-
   HIP_CHECK(hipMemcpy(escape_step, d_escape_step, alloc_size, hipMemcpyDeviceToHost));
   HIP_CHECK(hipDeviceSynchronize());
+  HIP_CHECK(hipGetLastError());
   HIP_CHECK(hipFree(d_escape_step));
   return;
 }

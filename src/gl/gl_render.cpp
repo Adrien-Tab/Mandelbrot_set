@@ -76,8 +76,13 @@ void handle_render(GLFWwindow* const window, WindowDim<double>* fract) {
   GLubyte* texture_data = new GLubyte[screen.size() * 3];
   WindowUtils::adjust_ratio(screen, fract);
   GlobalConfig::set_fractal_dim(fract->width(), fract->height());
+#ifdef USE_HIP
+  uint32_t* escape_step = nullptr;
+  HIP_CHECK(hipHostMalloc((void**)&escape_step, screen.size() * sizeof(uint32_t),
+                          hipDeviceScheduleAuto));
+#else
   uint32_t* escape_step = new uint32_t[screen.size()];
-
+#endif
   int iter_max = GlobalConfig::get_iter_max();
   mandelbrot(screen, *fract, escape_step, iter_max);
 
@@ -104,10 +109,16 @@ void handle_render(GLFWwindow* const window, WindowDim<double>* fract) {
       glfwGetWindowSize(window, &width, &height);
       screen.reset(0, width, 0, height);
 
-      delete[] escape_step;
       delete[] texture_data;
-      escape_step  = new uint32_t[screen.size()];
       texture_data = new GLubyte[screen.size() * 3];
+#ifdef USE_HIP
+      HIP_CHECK(hipFreeHost(escape_step));
+      HIP_CHECK(hipHostMalloc((void**)&escape_step, screen.size() * sizeof(uint32_t),
+                              hipDeviceScheduleAuto));
+#else
+      delete[] escape_step;
+      escape_step = new uint32_t[screen.size()];
+#endif
       std::cout << "Screen size : " << screen.size() << std::endl;
       WindowUtils::adjust_ratio(screen, fract);
       GlobalConfig::set_fractal_dim(fract->width(), fract->height());
@@ -165,8 +176,13 @@ void handle_render(GLFWwindow* const window, WindowDim<double>* fract) {
   glDeleteBuffers(1, &EBO);
   glDeleteProgram(shader_program);
   glDeleteTextures(1, &texture_image);
+
   delete[] texture_data;
+#ifdef USE_HIP
+  HIP_CHECK(hipFreeHost(escape_step));
+#else
   delete[] escape_step;
+#endif
 }
 
 /*

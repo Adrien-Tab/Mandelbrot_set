@@ -24,8 +24,6 @@ void sfml_handle(WindowDim<T> fract) {
 
   handle_event(window);
 
-  HIP_CHECK(hipSetDevice(0));
-  HIP_CHECK(hipDeviceSynchronize());
   handle_render(window, &fract);
   /*
   window.setActive(false);
