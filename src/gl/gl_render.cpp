@@ -15,11 +15,24 @@ void handle_render(GLFWwindow* const window, WindowDim<double>* fract) {
   glClearDepth(1.f);
   GL_CHECK();
 
-  constexpr float vertices[] = {1.0f, 1.0f,  0.0f, 1.0f,  1.0f,  1.0f, -1.0f,
-                                0.0f, 1.0f,  0.0f, -1.0f, -1.0f, 0.0f, 0.0f,
-                                0.0f, -1.0f, 1.0f, 0.0f,  0.0f,  1.0f};
+  // clang-format off
+  //                             positions             tex coords
+  constexpr float vertices[] = { -1.0f,  1.0f, 0.0f,   0.0f, 1.0f,  // N-W
+                                  1.0f,  1.0f, 0.0f,   1.0f, 1.0f,  // N-E
+                                  1.0f, -1.0f, 0.0f,   1.0f, 0.0f,  // S-E
+                                 -1.0f, -1.0f, 0.0f,   0.0f, 0.0f   // S-W
+                                };
 
-  constexpr unsigned int indices[] = {0, 1, 3, 1, 2, 3};
+  // Two triangles
+  // 0 * * * 1
+  // *     * *
+  // *   *   *
+  // * *     *
+  // 3 * * * 2
+  constexpr unsigned int indices[] = {0, 1, 3,
+                                      1, 2 ,3};
+
+  // clang-format on
 
   // Vertex
   GLuint VAO, VBO, EBO;
@@ -36,10 +49,12 @@ void handle_render(GLFWwindow* const window, WindowDim<double>* fract) {
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
   // Position attribute
+  // (location = 0), stride 5 float per vertex, start at 0.
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
 
   // Texture attribute
+  // (location = 1), stride 5 float per vertex, start at 3.
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
                         (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
@@ -73,7 +88,7 @@ void handle_render(GLFWwindow* const window, WindowDim<double>* fract) {
   glfwGetWindowSize(window, &width, &height);
   WindowDim<uint32_t> screen(width, height);
 
-  GLubyte* texture_data = new GLubyte[screen.size() * 3];
+  GLubyte* texture_data = new GLubyte[screen.size() * 4];
   WindowUtils::adjust_ratio(screen, fract);
   GlobalConfig::set_fractal_dim(fract->width(), fract->height());
 #ifdef USE_HIP
@@ -88,20 +103,23 @@ void handle_render(GLFWwindow* const window, WindowDim<double>* fract) {
 
   size_t k = 0;
   // Iterate each pixel
-  for (const auto& _ : screen) {
+  for (const auto _ : screen) {
     uint32_t n              = escape_step[k];
     auto [r, g, b]          = ColorSchemes::get_color(n, iter_max);
-    texture_data[3 * k + 0] = r;
-    texture_data[3 * k + 1] = g;
-    texture_data[3 * k + 2] = b;
+    texture_data[4 * k + 0] = r;
+    texture_data[4 * k + 1] = g;
+    texture_data[4 * k + 2] = b;
+    texture_data[4 * k + 3] = 255;
     k++;
   }
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                texture_data);
   GL_CHECK();
 
   unsigned int frame_counter = 0;
+
+  // Render loop
   while (!glfwWindowShouldClose(window)) {
     auto [center_x, center_y] = GlobalConfig::get_center();
     iter_max                  = GlobalConfig::get_iter_max();
@@ -109,8 +127,12 @@ void handle_render(GLFWwindow* const window, WindowDim<double>* fract) {
       glfwGetWindowSize(window, &width, &height);
       screen.reset(0, width, 0, height);
 
+      std::cout << "Screen size : " << screen.size() << std::endl;
+      WindowUtils::adjust_ratio(screen, fract);
+      GlobalConfig::set_fractal_dim(fract->width(), fract->height());
+
       delete[] texture_data;
-      texture_data = new GLubyte[screen.size() * 3];
+      texture_data = new GLubyte[screen.size() * 4];
 #ifdef USE_HIP
       HIP_CHECK(hipFreeHost(escape_step));
       HIP_CHECK(hipHostMalloc((void**)&escape_step, screen.size() * sizeof(uint32_t),
@@ -119,9 +141,6 @@ void handle_render(GLFWwindow* const window, WindowDim<double>* fract) {
       delete[] escape_step;
       escape_step = new uint32_t[screen.size()];
 #endif
-      std::cout << "Screen size : " << screen.size() << std::endl;
-      WindowUtils::adjust_ratio(screen, fract);
-      GlobalConfig::set_fractal_dim(fract->width(), fract->height());
 
       GlobalConfig::set_window_resized(false);
     }
@@ -141,21 +160,21 @@ void handle_render(GLFWwindow* const window, WindowDim<double>* fract) {
 
     k = 0;
     // Iterate each pixel
-    for (const auto& _ : screen) {
+    for (const auto _ : screen) {
       uint32_t n              = escape_step[k];
       auto [r, g, b]          = ColorSchemes::get_color(n, iter_max);
-      texture_data[3 * k + 0] = b;
-      texture_data[3 * k + 1] = g;
-      texture_data[3 * k + 2] = r;
+      texture_data[4 * k + 0] = b;
+      texture_data[4 * k + 1] = g;
+      texture_data[4 * k + 2] = r;
+      texture_data[4 * k + 3] = 255;
       k++;
     }
 
     glBindTexture(GL_TEXTURE_2D, texture_image);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE,
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
                     texture_data);
 
     glUseProgram(shader_program);
-    glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(window);
@@ -171,9 +190,9 @@ void handle_render(GLFWwindow* const window, WindowDim<double>* fract) {
     // std::cout << "New event !" << std::endl;
   }
 
-  glDeleteVertexArrays(1, &VAO);
   glDeleteBuffers(1, &VBO);
   glDeleteBuffers(1, &EBO);
+  glDeleteVertexArrays(1, &VAO);
   glDeleteProgram(shader_program);
   glDeleteTextures(1, &texture_image);
 

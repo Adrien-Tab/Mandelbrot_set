@@ -5,6 +5,7 @@ project(mandelbrot LANGUAGES CXX VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_COLOR_DIAGNOSTICS ON)
 
 option(ENABLE_SEQUENTIAL "Enable sequential CPU implementation" ON)
 option(ENABLE_OPENMP "Enable OpenMP acceleration" OFF)
@@ -58,8 +59,9 @@ find_package(glfw3 REQUIRED)
 if(ENABLE_SANITIZERS)
   if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT ENABLE_HIP)
     message(STATUS "Enabling Address and Memory Sanitizers")
-    add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
-    add_link_options(-fsanitize=address)
+    # -fsanitize=undefined -fsanitize=adress -fsanitize=memory
+    add_compile_options(-fsanitize=memory -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=memory)
   endif()
   if(ENABLE_HIP)
     add_compile_options(-fgpu-sanitize -Rpass-analysis=loop-vectorize

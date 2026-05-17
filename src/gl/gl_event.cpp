@@ -13,10 +13,11 @@ import core.global_config;
 #include "core/global_config.hpp"
 #endif
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action,
-                         int mods) {
+static void key_callback(GLFWwindow* window, int key, [[maybe_unused]] int scancode,
+                         int action, [[maybe_unused]] int mods) {
   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
+    glfwTerminate();
   }
   if (key == GLFW_KEY_TAB && action == GLFW_RELEASE) {
     GlobalConfig::switch_color_scheme();

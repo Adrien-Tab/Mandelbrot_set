@@ -1,5 +1,6 @@
 #include "glfw_utils.hpp"
 #include "utils.hpp"
+
 #include <iostream>
 
 namespace GLFWUtils {
@@ -22,7 +23,7 @@ int initialize() {
 
 void finalize() { glfwTerminate(); }
 
-GLFWwindow* create_window(const int initial_width, const int initial_height) {
+UniqueWindow create_window(const int initial_width, const int initial_height) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
@@ -32,12 +33,13 @@ GLFWwindow* create_window(const int initial_width, const int initial_height) {
 
   GLFWwindow* window =
       glfwCreateWindow(initial_width, initial_height, "Mandelbrot set", nullptr, nullptr);
-  glfwSetWindowMonitor(window, nullptr, 300, 300, initial_width, initial_height,
-                       GLFW_DONT_CARE);
   if (window == nullptr) {
     std::cerr << "Failed to create GLFW window\n";
     std::exit(1);
   }
+
+  glfwSetWindowMonitor(window, nullptr, 300, 300, initial_width, initial_height,
+                       GLFW_DONT_CARE);
 
   glfwMakeContextCurrent(window);
 
@@ -47,7 +49,7 @@ GLFWwindow* create_window(const int initial_width, const int initial_height) {
     std::exit(1);
   }
 
-  return window;
+  return UniqueWindow(window);
 }
 
 void print_configuration() {

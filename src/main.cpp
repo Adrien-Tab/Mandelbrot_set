@@ -17,24 +17,13 @@ import core.global_config;
 
 template <typename T>
   requires(std::is_floating_point_v<T>)
-void sfml_handle(WindowDim<T> fract) {
-  GLFWUtils::initialize();
-  GLFWwindow* const window = GLFWUtils::create_window(1200, 800);
+void OGL_handle(WindowDim<T> fract) {
+  auto window = GLFWUtils::create_window(1200, 800);
   GLFWUtils::print_configuration();
 
-  handle_event(window);
+  handle_event(window.get());
 
-  handle_render(window, &fract);
-  /*
-  window.setActive(false);
-
-  // std::thread julia_thread(&julia_handle);
-  std::thread rendering_thread(&render_handle, &window, &fract);
-
-  rendering_thread.join();
-  // julia_thread.join();
-  */
-  GLFWUtils::finalize();
+  handle_render(window.get(), &fract);
 }
 
 int main(int argc, char* argv[]) {
@@ -46,7 +35,9 @@ int main(int argc, char* argv[]) {
 
   GlobalConfig::set_fractal_dim(fract.width(), fract.height());
 
-  sfml_handle(fract);
+  GLFWUtils::initialize();
+  OGL_handle(fract);
+  GLFWUtils::finalize();
 
   return 0;
 }

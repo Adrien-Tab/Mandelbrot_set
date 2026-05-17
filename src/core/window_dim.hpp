@@ -71,6 +71,7 @@ struct WindowDim {
 
     std::pair<T, T> operator*() const { return std::pair<T, T>{x, y}; }
 
+    // Row first
     Iterator& operator++() {
       if (this->x < x_max - 1) {
         this->x++;

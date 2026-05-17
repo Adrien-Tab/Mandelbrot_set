@@ -20,12 +20,12 @@ struct ConfigData {
 };
 
 // Multi threads render
-extern std::condition_variable _render_condition;
-extern std::mutex _render_mutex;
+extern std::condition_variable g_render_condition;
+extern std::mutex g_render_mutex;
 
 // Multi threads accessible
-extern ConfigData _config_data;
-extern std::mutex _config_mutex;
+extern ConfigData g_config_data;
+extern std::mutex g_config_mutex;
 }  // namespace
 
 void parse_from_argv(int argc, char* argv[]);
@@ -57,8 +57,8 @@ struct LogData {
   float display_time_ms;
 };
 
-extern LogData _log_data;
-extern std::mutex _log_mutex;
+extern LogData g_log_data;
+extern std::mutex g_log_mutex;
 }  // namespace
 
 void print_log();
