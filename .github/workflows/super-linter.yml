@@ -14,20 +14,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
         with:
           # Full git history is needed to get a proper list of changed files within `super-linter`
           fetch-depth: 0
           persist-credentials: false
 
       - name: Lint Code Base
-        uses: super-linter/super-linter:latest
+        uses: super-linter/super-linter@v8.6.0
         env:
           VALIDATE_CPP: true
-          VALIDATE_YAML: false
-          VALIDATE_YAML_PRETTIER: false
           VALIDATE_MARKDOWN: true
           VALIDATE_MARKDOWN_PRETTIER: true
           VALIDATE_NATURAL_LANGUAGE: true
           CPP_CLANG_FORMAT_CONFIG_FILE: .clang-format
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
